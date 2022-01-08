@@ -54,7 +54,7 @@ nav h1 {
   box-shadow: none;
 }
 
-.selectSort li:active {
+.selectSort li.clicked {
   color: #333333;
   background-color: white;
   box-shadow: none;
@@ -121,12 +121,17 @@ main .animate {
   font-size: 3rem;
   justify-content: center;
   gap: 10px;
+  position: relative;
 }
 
 .animate li {
+  position: relative;
+  top: 0;
+  left: 0;
   border: solid 2px rgb(172, 172, 172);
   border-radius: 8px;
   padding: 4px 8px;
+  transition: all 0.5s ease-in-out;
 }
 
 footer {
