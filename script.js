@@ -14,7 +14,7 @@ function selectionSort(unsortAry, sortAry = []) {
   return selectionSort(unsortAry.slice(1), [...sortAry]);
 }
 
-console.log(selectionSort([5, 4, 3, 2, 1]));
+// console.log(selectionSort([5, 4, 3, 2, 1]));
 
 // --------------------- DOM manipulation ---------------------
 
@@ -22,6 +22,8 @@ const selectSorts = [...document.querySelectorAll(".selectSort li")];
 const addBtn = document.querySelector(".addBtn");
 const inputField = document.querySelector(".inputField");
 const calcBtn = document.querySelector(".calcBtn");
+const animate = document.querySelector(".animate");
+const reset = document.querySelector(".reset");
 
 let sortId = "";
 
@@ -57,41 +59,42 @@ calcBtn.addEventListener("click", () => {
   if (!sortId) {
     return alert("Select any sorting algorithm");
   }
+
+  selectionAnim(data);
+  reset.classList.remove("hidden");
 });
 
-function whichSort(ary) {
-  switch (sortId) {
-    case "Selection":
-
-    case "Merge":
-
-    case "Quick":
-
-    default:
-      return;
+reset.addEventListener("click", () => {
+  while (animate.firstChild) {
+    animate.removeChild(animate.lastChild);
   }
-  const data = ary;
-  return data;
+  while (inputField.firstChild) {
+    inputField.removeChild(inputField.lastChild);
+  }
+  reset.classList.add("hidden");
+});
+
+function liCreator(ary) {
+  while (animate.firstChild) {
+    animate.removeChild(animate.lastChild);
+  }
+
+  for (let val of ary) {
+    let li = document.createElement("li");
+    li.textContent = val;
+    animate.appendChild(li);
+  }
 }
 
 // Functions for animation ------------------------
 
-async function moveUpRight(elm, delX, delY, delay) {
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.top = `-${Math.abs(delY)}px`;
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.left = `${Math.abs(delX)}px`;
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.top = `0px`;
-}
+async function moveTo(elm, dirAry, delay) {
+  // dirAry ==> [ [top/left, delX/Y, 1/-1] , .... ]
 
-async function moveDownLeft(elm, delX, delY, delay) {
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.top = `${Math.abs(delY)}px`;
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.left = `-${Math.abs(delX)}px`;
-  await new Promise((resolve) => setTimeout(resolve, delay));
-  elm.style.top = `0px`;
+  for (let i of dirAry) {
+    elm.style[i[0]] = `${i[2] * Math.abs(i[1])}px`;
+    await new Promise((resolve) => setTimeout(resolve, delay));
+  }
 }
 
 async function swapElm(elm1, elm2) {
@@ -100,19 +103,57 @@ async function swapElm(elm1, elm2) {
   let yDif =
     elm1.getBoundingClientRect().top - elm2.getBoundingClientRect().top;
   let delay = 500;
+  let elm1Ary = [];
+  let elm2Ary = [];
 
-  xDif === 0
-    ? (xDif = elm1.getBoundingClientRect().width + 25)
-    : (yDif = elm1.getBoundingClientRect().width + 25);
+  if (window.innerWidth > 810) {
+    yDif = elm1.getBoundingClientRect().width + 25;
+    elm1Ary.push(["top", yDif, -1]);
+    elm1Ary.push(["left", xDif, 1]);
+    elm1Ary.push(["top", 0, 1]);
 
-  moveUpRight(elm1, xDif, yDif, delay);
-  moveDownLeft(elm2, xDif, yDif, delay);
+    elm2Ary.push(["top", yDif, 1]);
+    elm2Ary.push(["left", xDif, -1]);
+    elm2Ary.push(["top", 0, 1]);
+  } else {
+    xDif = elm1.getBoundingClientRect().width + 25;
+    elm1Ary.push(["left", xDif, 1]);
+    elm1Ary.push(["top", yDif, 1]);
+    elm1Ary.push(["left", 0, 1]);
+
+    elm2Ary.push(["left", xDif, -1]);
+    elm2Ary.push(["top", yDif, -1]);
+    elm2Ary.push(["left", 0, 1]);
+  }
+
+  moveTo(elm1, elm1Ary, delay);
+  await moveTo(elm2, elm2Ary, delay);
 }
 
-swapElm(
-  document.querySelector(".animate li:nth-child(1)"),
-  document.querySelector(".animate li:nth-child(5)")
-);
+async function selectionAnim(ary) {
+  let sortAry = selectionSort([...ary]);
+  let tmp;
+  liCreator(ary);
+  for (subAry of sortAry) {
+    await swapElm(animate.children[subAry[0]], animate.children[subAry[1]]);
+    // await new Promise((resolve) => setTimeout(resolve, 1000));
+    console.log(
+      animate.children[subAry[0]],
+      animate.children[subAry[1]],
+      "hello"
+    );
+    tmp = ary[subAry[0]];
+    ary[subAry[0]] = ary[subAry[1]];
+    ary[subAry[1]] = tmp;
+
+    liCreator(ary);
+  }
+  return new Promise((resolve) => {
+    resolve;
+  });
+}
+
+// selectionAnim([5, 4, 3, 2, 1]);
 
 // Functions for animation ------------------------
 

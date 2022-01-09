@@ -153,6 +153,10 @@ footer {
   width: fit-content;
 }
 
+.hidden {
+  visibility: hidden;
+}
+
 .reset:hover {
   background-color: #444444;
   border-color: #444444;
