@@ -131,9 +131,24 @@ async function swapElm(elm1, elm2) {
 }
 
 async function selectionAnim(ary) {
+  class LiElm {
+    constructor(liElm) {
+      this.xPos = 0;
+      this.yPos = 0;
+      this.elm = liElm;
+    }
+
+    changeDir(xDir = 0, yDir = 0) {
+      this.xPos += xDir;
+      this.yPos += yDir;
+      this.elm.style.left = `${this.xPos}px`;
+      this.elm.style.top = `${this.yPos}px`;
+    }
+  }
   let sortAry = selectionSort([...ary]);
   let tmp;
   liCreator(ary);
+
   for (subAry of sortAry) {
     await swapElm(animate.children[subAry[0]], animate.children[subAry[1]]);
     // await new Promise((resolve) => setTimeout(resolve, 1000));
@@ -154,6 +169,94 @@ async function selectionAnim(ary) {
 }
 
 // selectionAnim([5, 4, 3, 2, 1]);
+
+function showHide(ary1, ary2) {
+  let tmp = [];
+  let som = 0;
+  for (let i = 0; i < ary1.length; i++) {
+    for (let j = som; j < ary2.length; j++) {
+      if (ary1[i] < ary2[j]) {
+        tmp.push(i);
+        break;
+      }
+      tmp.push(ary1.length + j);
+      som++;
+    }
+  }
+  for (let cnt = 0; cnt < ary1.length + ary2.length; cnt++) {
+    let tst = true;
+    for (val of tmp) {
+      tst = cnt === val ? false : tst;
+    }
+    if (tst) {
+      tmp.push(cnt);
+    }
+  }
+  return tmp;
+}
+
+// console.log(showHide([2], [1]));
+
+function recursive([...ary]) {
+  let tmp = [];
+  let returnAry = [];
+  for (let i = 0; 2 ** i < ary.length; i++) {
+    tmp = [];
+    for (let n = 0; n < Math.ceil(ary.length / 2 ** i); n += 2) {
+      let lng = tmp.length;
+      if (
+        ary.length % 2 ** i &&
+        Math.floor(ary.length / 2 ** i) % 2 &&
+        n > Math.floor(ary.length / 2 ** i) - 1
+      ) {
+        // console.log("no", i, n);
+        let anttmp = showHide(
+          ary.slice(2 ** i * n, 2 ** i * (n + 1)),
+          ary.slice(2 ** i * (n + 1), ary.length)
+        );
+        let itr = 0;
+        anttmp.push((val) => {
+          anttmp[itr] = val + lng;
+          itr++;
+        });
+        tmp.push(...anttmp);
+        break;
+      }
+      if (
+        Math.ceil(ary.length / 2 ** i) % 2 &&
+        n > Math.floor(ary.length / 2 ** i) - 1
+      ) {
+        // console.log("yes", i, n);
+        let anttmp = ary.slice(2 ** i * n, ary.length);
+        anttmp.forEach((val) => {
+          tmp.push(tmp.length);
+        });
+        break;
+      }
+      let ttmp = showHide(
+        ary.slice(2 ** i * n, 2 ** i * (n + 1)),
+        ary.slice(2 ** i * (n + 1), 2 ** i * (n + 2))
+      );
+      // console.log(2 ** i * n, 2 ** i * (n + 1), 2 ** i * (n + 2));
+      let itr = 0;
+      ttmp.forEach((val) => {
+        ttmp[itr] = val + lng;
+        itr++;
+        // console.log(ttmp);
+      });
+      tmp.push(...ttmp);
+    }
+    let ann = [];
+    tmp.forEach((val) => {
+      ann.push(ary[val]);
+    });
+    returnAry.push([...tmp]);
+    ary = [...ann];
+  }
+  return returnAry;
+}
+
+console.log(recursive([5, 1, 3]));
 
 // Functions for animation ------------------------
 
