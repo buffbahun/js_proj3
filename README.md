@@ -9,3 +9,7 @@ I have created a recursive selection sorting algorithm. This algorithm basically
 ## Merge sort
 
 I have created a function for merge sort. For the purpose of visualization the merge function only provides the position of updated array.
+
+### Note:
+
+I know the code is very ugly. I have a lot to refactor. Which I will do later in future(If I not feeling lazy, which btw I always am :laughing:). If I refactor the code in future, you won't see this section :wink:.

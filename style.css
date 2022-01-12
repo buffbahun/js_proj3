@@ -120,7 +120,7 @@ main .animate {
   display: flex;
   font-size: 3rem;
   justify-content: center;
-  gap: 10px;
+  gap: 5px;
   position: relative;
 }
 
@@ -131,7 +131,13 @@ main .animate {
   border: solid 2px rgb(172, 172, 172);
   border-radius: 8px;
   padding: 4px 8px;
+  text-align: center;
+  width: 50px;
   transition: all 0.5s ease-in-out;
+}
+
+.animate li.mar {
+  transition: margin 0.5s ease-in-out;
 }
 
 footer {
@@ -167,6 +173,19 @@ footer {
   color: #333333;
   background-color: white;
   box-shadow: none;
+}
+
+div.created {
+  position: absolute;
+  /* top: 0; */
+  /* left: 0; */
+  border: solid 2px rgb(172, 172, 172);
+  border-radius: 8px;
+  padding: 4px 8px;
+  transition: all 0.5s ease-in-out;
+  font-size: 3rem;
+  text-align: center;
+  width: 50px;
 }
 
 /* Media query for mobile version */

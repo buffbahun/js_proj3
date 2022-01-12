@@ -60,7 +60,15 @@ calcBtn.addEventListener("click", () => {
     return alert("Select any sorting algorithm");
   }
 
-  selectionAnim(data);
+  if (sortId === selectSorts[0].id) {
+    selectionAnim(data);
+  }
+
+  if (sortId === selectSorts[1].id) {
+    console.log("yes");
+    mergeAnim(data);
+  }
+
   reset.classList.remove("hidden");
 });
 
@@ -131,20 +139,6 @@ async function swapElm(elm1, elm2) {
 }
 
 async function selectionAnim(ary) {
-  class LiElm {
-    constructor(liElm) {
-      this.xPos = 0;
-      this.yPos = 0;
-      this.elm = liElm;
-    }
-
-    changeDir(xDir = 0, yDir = 0) {
-      this.xPos += xDir;
-      this.yPos += yDir;
-      this.elm.style.left = `${this.xPos}px`;
-      this.elm.style.top = `${this.yPos}px`;
-    }
-  }
   let sortAry = selectionSort([...ary]);
   let tmp;
   liCreator(ary);
@@ -169,6 +163,182 @@ async function selectionAnim(ary) {
 }
 
 // selectionAnim([5, 4, 3, 2, 1]);
+
+async function mergeAnim(arry) {
+  class DivElm {
+    constructor(div) {
+      this.xPos = 0;
+      this.yPos = 0;
+      this.div = div;
+    }
+
+    moveTo(x = 0, y = 0) {
+      this.div.style.left = this.xPos + x + "px";
+      this.div.style.top = this.yPos + y + "px";
+      this.xPos += x;
+      this.yPos += y;
+    }
+  }
+
+  liCreator(arry);
+
+  let data = [];
+
+  const liElms = [...animate.children];
+
+  liElms.forEach((el) => {
+    el.classList.add("mar");
+  });
+
+  let margin = marginIt(+animate.childElementCount, "margin");
+  let demargin = marginIt(+animate.childElementCount, "demargin");
+
+  let diffa, diffb;
+  if (window.innerWidth > 810) {
+    diffa = 0;
+    diffb = 100;
+  } else {
+    diffa = 100;
+    diffb = 0;
+  }
+
+  for (let ary of margin) {
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    for (let position of ary) {
+      if (!diffa) {
+        liElms[position].style.marginRight = "22px";
+      } else {
+        liElms[position].style.marginBottom = "22px";
+      }
+    }
+  }
+
+  for (let value of liElms) {
+    data.push(+value.textContent);
+  }
+
+  let poss = recursive(data);
+  let cnt = 0;
+  for (let pos of poss) {
+    const divElms = [];
+
+    let ary = demargin[cnt++];
+    for (let position of ary) {
+      if (!diffa) {
+        liElms[position].style.marginRight = "0px";
+      } else {
+        liElms[position].style.marginBottom = "0px";
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 500));
+
+    for (let value of liElms) {
+      let div = document.createElement("div");
+      div.classList.add("created");
+      div.textContent = value.textContent;
+      document.body.appendChild(div);
+      divElms.push(new DivElm(div));
+    }
+
+    for (let i = 0; i < divElms.length; i++) {
+      let x = liElms[i].getBoundingClientRect().left;
+      let y = liElms[i].getBoundingClientRect().top;
+      divElms[i].moveTo(x, y);
+    }
+
+    for (let i = 0; i < pos.length; i++) {
+      let diff0 =
+        liElms[i].getBoundingClientRect().left -
+        liElms[pos[i]].getBoundingClientRect().left;
+
+      let diff1 =
+        liElms[i].getBoundingClientRect().top -
+        liElms[pos[i]].getBoundingClientRect().top;
+
+      diffa === 0 ? (diff1 = 0) : (diff0 = 0);
+
+      liElms[pos[i]].style.visibility = "hidden";
+      divElms[pos[i]].moveTo(diff0 + diffa, diff1 + diffb);
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+    }
+
+    for (let rm of divElms) {
+      if (!diffa) {
+        rm.moveTo(0, -100);
+      } else {
+        rm.moveTo(-100, 0);
+      }
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    for (let rm of divElms) {
+      rm.div.remove();
+    }
+    let somVal = [];
+    for (let val of pos) {
+      somVal.push(liElms[val].textContent);
+    }
+    let anCnt = 0;
+    for (let val of liElms) {
+      val.textContent = somVal[anCnt++];
+      val.style.visibility = "visible";
+    }
+  }
+  liElms.forEach((el) => {
+    el.classList.remove("mar");
+  });
+}
+
+// mergeAnim();
+
+function marginIt(lng, code) {
+  let tmp = [];
+
+  if (code === "margin") {
+    tmp = [[lng]];
+    while (tmp[tmp.length - 1].length < lng) {
+      let insrt = [];
+      for (let value of tmp[tmp.length - 1]) {
+        if (value < 2) {
+          insrt.push(value);
+        } else {
+          insrt.push(Math.ceil(value / 2), Math.floor(value / 2));
+        }
+      }
+      tmp.push(insrt);
+    }
+    tmp.shift();
+
+    for (let ary of tmp) {
+      let sum = 0;
+      let cnt = 0;
+      for (let value of ary) {
+        ary[cnt++] = sum + value - 1;
+        sum += value;
+      }
+      ary.pop();
+    }
+  }
+
+  if (code === "demargin") {
+    let i = 0;
+    while (2 ** i < lng) {
+      let n = 0;
+      let tmpAry = [];
+      while (2 ** i - 1 + n * 2 ** (i + 1) < lng - 1) {
+        tmpAry.push(2 ** i - 1 + n * 2 ** (i + 1));
+        n++;
+      }
+      tmp.push(tmpAry);
+      i++;
+    }
+  }
+
+  return tmp;
+}
+
+// console.log(marginIt(9, "demargin"));
 
 function showHide(ary1, ary2) {
   let tmp = [];
@@ -209,7 +379,6 @@ function recursive([...ary]) {
         Math.floor(ary.length / 2 ** i) % 2 &&
         n > Math.floor(ary.length / 2 ** i) - 1
       ) {
-        // console.log("no", i, n);
         let anttmp = showHide(
           ary.slice(2 ** i * n, 2 ** i * (n + 1)),
           ary.slice(2 ** i * (n + 1), ary.length)
@@ -242,7 +411,6 @@ function recursive([...ary]) {
       ttmp.forEach((val) => {
         ttmp[itr] = val + lng;
         itr++;
-        // console.log(ttmp);
       });
       tmp.push(...ttmp);
     }
@@ -256,7 +424,7 @@ function recursive([...ary]) {
   return returnAry;
 }
 
-console.log(recursive([5, 1, 3]));
+// console.log(recursive([10, 9, 8, 7, 6, 5, 4, 3, 2, 1]));
 
 // Functions for animation ------------------------
 
